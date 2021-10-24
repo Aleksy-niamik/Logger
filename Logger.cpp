@@ -12,7 +12,7 @@ using SimpleDataStructures::ArrayIterator;
 
 
 template <uint16_t MaxLogSize>
-void Logging::Logger<MaxLogSize>::bind(LogType logType, LogMedium* transmitter)
+void Logging::Logger<MaxLogSize>::bind(LogType logType, ILogMedium* transmitter)
 {
     if (transmitter == nullptr)
         return;
@@ -35,7 +35,7 @@ void Logging::Logger<MaxLogSize>::bind(LogType logType, LogMedium* transmitter)
 
 
 template <uint16_t MaxLogSize>
-void Logging::Logger<MaxLogSize>::unbind(LogType logType, LogMedium* transmitter)
+void Logging::Logger<MaxLogSize>::unbind(LogType logType, ILogMedium* transmitter)
 {
     if (transmitter == nullptr)
         return;
@@ -51,14 +51,14 @@ void Logging::Logger<MaxLogSize>::unbind(LogType logType, LogMedium* transmitter
 
 
 template <uint16_t MaxLogSize>
-GrowingArray<Logging::LogMedium*> Logging::Logger<MaxLogSize>::getLogMediums(LogType logType)
+GrowingArray<Logging::ILogMedium*> Logging::Logger<MaxLogSize>::getLogMediums(LogType logType)
 {
     auto iter = ArrayIterator<Binding>(bindings);
     uint8_t n = 0;
     while (iter.hasNext())
         if (iter.next().first == logType) n++;
 
-    auto array = GrowingArray<LogMedium*>(n);
+    auto array = GrowingArray<ILogMedium*>(n);
 
     iter = ArrayIterator<Binding>(bindings);
     while (iter.hasNext())

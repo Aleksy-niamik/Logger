@@ -7,7 +7,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "LogMedium.h"
+#include "ILogMedium.h"
 #include "LogType.h"
 #include "Pair.h"
 #include <GrowingArray.h>
@@ -20,7 +20,7 @@ namespace Logging
     template <uint16_t MaxLogSize = 30>
     class Logger
     {
-        typedef Pair<LogType, LogMedium*> Binding;
+        typedef Pair<LogType, ILogMedium*> Binding;
 
         SimpleDataStructures::GrowingArray<Binding> bindings;
 
@@ -41,9 +41,9 @@ namespace Logging
         Logger(const Logger&) = delete;
         Logger& operator=(const Logger&) = delete;
 
-        void bind(LogType logType, LogMedium* transmitter);
-        void unbind(LogType logType, LogMedium* transmitter);
-        SimpleDataStructures::GrowingArray<LogMedium*> getLogMediums(LogType logType);
+        void bind(LogType logType, ILogMedium* transmitter);
+        void unbind(LogType logType, ILogMedium* transmitter);
+        SimpleDataStructures::GrowingArray<ILogMedium*> getLogMediums(LogType logType);
 
         void setPrecision(uint8_t precision);
 

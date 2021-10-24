@@ -5,7 +5,7 @@
 Logging::Logger<8> logger;
 
 
-class Medium1 : public Logging::LogMedium
+class Medium1 : public Logging::ILogMedium
 {
     void log(const char* message) override
     {
