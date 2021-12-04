@@ -12,6 +12,11 @@
 
 namespace Logging
 {
+    /**
+     * @brief Simple template pair structure with equality and non-equality operators
+     * @tparam type of the first element
+     * @tparam type of the second element
+     */
     template <class T1, class T2>
     struct Pair
     {
