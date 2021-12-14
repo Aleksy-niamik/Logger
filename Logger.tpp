@@ -1,12 +1,12 @@
 /**
- * @file Logger.h
+ * @file Logger.tpp
  * @author Aleksy Walczak (aleksyww@gmail.com)
  * @date 2021-04-12
  */
 
 namespace Logging
 {
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value], uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()], uint16_t MaxLogSize>
     template <class T>
     void Logger<E, Headers, MaxLogSize>::log(LogType logType, T item)
     {
@@ -35,7 +35,7 @@ namespace Logging
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value], uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()], uint16_t MaxLogSize>
     template <class First, class... Args>
     void Logger<E, Headers, MaxLogSize>::log(LogType logType, First first, Args... args)
     {
@@ -43,7 +43,7 @@ namespace Logging
         log(logType, args...);
     }
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value], uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()], uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::bind(LogType logType, ILogMedium* transmitter)
     {
         if (transmitter == nullptr)
@@ -70,7 +70,7 @@ namespace Logging
 
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::unbind(LogType logType, ILogMedium* transmitter)
     {
         if (transmitter == nullptr)
@@ -86,7 +86,7 @@ namespace Logging
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     SimpleDataStructures::GrowingArray<ILogMedium*> Logger<E, Headers, MaxLogSize>::getLogMediums(LogType logType) const
     {
         auto iter = SimpleDataStructures::ArrayIterator<Binding>(bindings);
@@ -104,7 +104,7 @@ namespace Logging
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::setPrecision(uint8_t precision)
     {
         this->precision = precision;
@@ -114,49 +114,49 @@ namespace Logging
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::setHeaderSeparator(char headerSeparator)
     {
         this->headerSeparator = headerSeparator;
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::setBufferOverflowCharacter(char bufferOverflowCharacter)
     {
         this->bufferOverflowCharacter = bufferOverflowCharacter;
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::setDecimalSeparator(char decimalSeparator)
     {
         this->decimalSeparator = decimalSeparator;
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     char Logger<E, Headers, MaxLogSize>::getHeaderSeparator() const
     {
         return headerSeparator;
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     char Logger<E, Headers, MaxLogSize>::getBufferOverflowCharacter() const
     {
         return bufferOverflowCharacter;
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     char Logger<E, Headers, MaxLogSize>::getDecimalSeparator() const
     {
         return decimalSeparator;
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::addToBuffer(const char* str)
     {
         while(*str != '\0' && endIndex < BufferSize)
@@ -166,7 +166,7 @@ namespace Logging
             isOverflowed = true;
     }
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::addToBuffer(char c)
     {
         if (endIndex < BufferSize)
@@ -180,11 +180,12 @@ namespace Logging
      * 
      * @param number 
      */
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
-    template <class T>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
+    template <class T, bool B>
     void Logger<E, Headers, MaxLogSize>::addToBuffer(T number)
     {
-        //TODO: add checking unsigned types and int types
+        static_assert(B, "type T has to be an integral type");
+
         if (number < 0)
         {
             if (endIndex < BufferSize)
@@ -229,7 +230,17 @@ namespace Logging
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
+    void Logger<E, Headers, MaxLogSize>::addToBuffer(bool b)
+    {
+        if (endIndex < BufferSize)
+            buffer[endIndex++] = b ? '1' : '0';
+        else
+            isOverflowed = true;
+    }
+
+
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::addToBuffer(float number)
     {
         if (number < 0)
@@ -250,7 +261,7 @@ namespace Logging
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::addToBuffer(double number)
     {
         if (number < 0)
@@ -271,7 +282,7 @@ namespace Logging
     }
 
 
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value],uint16_t MaxLogSize>
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::prepareHeader(uint32_t logType)
     {
         buffer[EnumCount] = headerSeparator;

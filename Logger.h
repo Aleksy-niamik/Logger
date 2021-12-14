@@ -18,14 +18,30 @@
 
 namespace Logging
 {
-    template <class E, const char (&Headers)[EnumElementsCount<E>::value], uint16_t MaxLogSize = 30>
+    constexpr bool checkHeadersPrintable(const char * Headers, size_t length)
+    {
+        for (size_t i = 0; i < length; ++i)
+        {
+            if (Headers[i] < ' ' || Headers[i] > '~')
+                return false;
+        }
+
+        return true;
+    }
+
+
+    template <class E,
+        const char (&Headers)[enum_elements_count<E>()],
+        uint16_t MaxLogSize = 30>
     class Logger
     {
-        static_assert(std::is_enum<E>::value, " ");  // TODO: errrrr mess
-        static_assert(is_scoped_enum<E>(), "enum musi byc enum class");
-        // TODO: check if Headers have correct values
+        static_assert(std::is_enum<E>(), "type E must be scoped enumeration type");
+        static_assert(is_scoped_enum<E>(), "type E must be scoped enumeration");
+        static_assert(enum_elements_count<E>() <= 32, "enum E can't be bigger than 32 elements (sorry)");
+        static_assert(is_enum_normalized<E>(), "enum E must be normalized (begins from 0 and has no gaps)");
+        static_assert(checkHeadersPrintable(Headers, enum_elements_count<E>()), "each header must be printable character"); 
 
-        static constexpr const int EnumCount = EnumElementsCount<E>::value;
+        static constexpr const int EnumCount = enum_elements_count<E>();
         
         typedef FlagEnum<E> LogType;
         typedef Pair<uint32_t, ILogMedium*> Binding;
@@ -34,8 +50,8 @@ namespace Logging
 
         static constexpr std::size_t BufferSize = MaxLogSize + EnumCount + 1;
         char buffer[BufferSize + 1];
-        uint8_t startIndex;
-        uint8_t endIndex = EnumCount + 1;
+        std::size_t startIndex;
+        std::size_t endIndex = EnumCount + 1;
         bool isOverflowed = false;
 
         char headerSeparator = '/';
@@ -73,9 +89,10 @@ namespace Logging
         void log(LogType logType, First first, Args... args);
 
     private:
-        template <class T>
+        template <class T, bool B = std::is_integral<T>::value>
         void addToBuffer(T integer);
 
+        void addToBuffer(bool b);
         void addToBuffer(char c);
         void addToBuffer(const char* str);
         void addToBuffer(float number);

@@ -1,5 +1,5 @@
 /**
- * @file Logger.h
+ * @file EnumReflection.h
  * @author Aleksy Walczak (aleksyww@gmail.com)
  * @date 2021-04-09
  */
@@ -74,10 +74,11 @@ constexpr int internalElementCount(std::integer_sequence<uint8_t, ints...> unuse
 
 
 template <class E>
-struct EnumElementsCount
-{
-    static constexpr int value = internalElementCount<E>(make_bigger_seq(std::make_integer_sequence<uint8_t, 255>()));
-};
+struct enum_elements_count : std::integral_constant<
+    int, 
+    internalElementCount<E>(make_bigger_seq(
+        std::make_integer_sequence<uint8_t, 255>()))
+> {};
 
 
 template <typename T, bool B = std::is_enum<T>::value>
@@ -90,6 +91,39 @@ struct is_scoped_enum<T, true> : std::integral_constant<bool,
         T,
         typename std::underlying_type<T>::type
     >::value
+> {};
+
+
+template <class E>
+constexpr int countNormalized()
+{
+    return 0;
+}
+
+
+template <class E, E A, E... B>
+constexpr int countNormalized()
+{
+    if (isValid<E, A>())
+        return 1 + countNormalized<E, B...>();
+    else return 0;
+}
+
+
+template <class E, uint8_t... ints>
+constexpr int internalEnumNormalized(std::integer_sequence<uint8_t, ints...> unused)
+{
+    return countNormalized<E, (E)ints...>();
+}
+
+
+template <class E>
+struct is_enum_normalized : std::integral_constant<
+    bool, 
+    internalEnumNormalized<E>(make_bigger_seq(
+        std::make_integer_sequence<uint8_t, 255>()))
+    ==
+    enum_elements_count<E>()
 > {};
 
 
