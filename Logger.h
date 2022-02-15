@@ -18,6 +18,16 @@
 
 namespace Logging
 {
+    using namespace EnumReflection;
+
+    /**
+     * @brief 
+     * 
+     * @param Headers 
+     * @param length 
+     * @return true 
+     * @return false 
+     */
     constexpr bool checkHeadersPrintable(const char * Headers, size_t length)
     {
         for (size_t i = 0; i < length; ++i)
@@ -30,20 +40,38 @@ namespace Logging
     }
 
 
+    /**
+     * @brief 
+     * 
+     * @tparam E 
+     * @tparam (&Headers)[enum_elements_count<E>()] 
+     * @tparam MaxLogSize 
+     */
     template <class E,
         const char (&Headers)[enum_elements_count<E>()],
         uint16_t MaxLogSize = 30>
     class Logger
     {
+        static constexpr const int EnumCount = enum_elements_count<E>();
+
         static_assert(std::is_enum<E>(), "type E must be scoped enumeration type");
         static_assert(is_scoped_enum<E>(), "type E must be scoped enumeration");
-        static_assert(enum_elements_count<E>() <= 32, "enum E can't be bigger than 32 elements (sorry)");
+        static_assert(EnumCount <= 32, "enum E can't be bigger than 32 elements (sorry)");
         static_assert(is_enum_normalized<E>(), "enum E must be normalized (begins from 0 and has no gaps)");
-        static_assert(checkHeadersPrintable(Headers, enum_elements_count<E>()), "each header must be printable character"); 
+        static_assert(checkHeadersPrintable(Headers, EnumCount), "each header must be printable character"); 
 
-        static constexpr const int EnumCount = enum_elements_count<E>();
         
+        /**
+         * asdfsfg
+         * 
+         */
         typedef FlagEnum<E> LogType;
+
+
+        /**
+         * @brief Binding type
+         * 
+         */
         typedef Pair<uint32_t, ILogMedium*> Binding;
 
         SimpleDataStructures::GrowingArray<Binding> bindings;
@@ -78,6 +106,11 @@ namespace Logging
         void setBufferOverflowCharacter(char bufferOverflowCharacter);
         void setDecimalSeparator(char decimalSeparator);
 
+        /**
+         * @brief Get the Header Separator object
+         * 
+         * @return char 
+         */
         char getHeaderSeparator() const;
         char getBufferOverflowCharacter()const;
         char getDecimalSeparator() const;

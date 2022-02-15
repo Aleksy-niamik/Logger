@@ -43,6 +43,7 @@ namespace Logging
         log(logType, args...);
     }
 
+
     template <class E, const char (&Headers)[enum_elements_count<E>()], uint16_t MaxLogSize>
     void Logger<E, Headers, MaxLogSize>::bind(LogType logType, ILogMedium* transmitter)
     {
@@ -67,7 +68,6 @@ namespace Logging
         if (!transmitterExists)
             bindings.add(Binding((uint32_t)logType, transmitter));
     }
-
 
 
     template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
@@ -175,11 +175,7 @@ namespace Logging
             isOverflowed = true;
     }
 
-    /**
-     * @brief funkcja
-     * 
-     * @param number 
-     */
+
     template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     template <class T, bool B>
     void Logger<E, Headers, MaxLogSize>::addToBuffer(T number)

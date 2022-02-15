@@ -1,9 +1,11 @@
-#include <mbed.h>
+// #include <mbed.h>
 
 #include "Logger.h"
 
+using namespace EnumReflection;
+
 // DigitalOut  myled(PC_13);   // on-board LED
-Serial pc(PA_9, PA_10); // tx, rx
+// Serial pc(PA_9, PA_10); // tx, rx
 
 enum class Bal
 {
@@ -14,14 +16,14 @@ constexpr const char Headers[]={'8','A','a', 'b', 'L'};
 
 enum class LogType
 {
-  Base, Debug, Info, Error, qasdfghjk
+  Base, Debug=2, Info=1, Error=3, qasdfghjk
 };
 
 class Ser : public Logging::ILogMedium
 {
   void log(const char* message) override
   {
-    pc.printf(message);
+    // pc.printf(message);
   }
 } ser;
 
