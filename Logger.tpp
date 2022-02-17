@@ -9,16 +9,14 @@ namespace Logging
     template <class E, const char (&Headers)[enum_elements_count<E>()], uint16_t MaxLogSize>
     template <class T>
     void Logger<E, Headers, MaxLogSize>::log(LogType logType, T item)
-    {
-        using SimpleDataStructures::ArrayIterator;
-        
+    {        
         addToBuffer(item);
         if (isOverflowed)
             buffer[BufferSize-1] = bufferOverflowCharacter;
             
         buffer[endIndex] = '\0';
 
-        auto iter = ArrayIterator<Binding>(bindings);
+        auto iter = bindings.getIterator();
         
         while (iter.hasNext())
         {
@@ -51,7 +49,7 @@ namespace Logging
             return;
 
         
-        auto iter = SimpleDataStructures::ArrayIterator<Binding>(bindings);
+        auto iter = bindings.getIterator();
         bool transmitterExists = false;
         while (iter.hasNext())
         {
@@ -76,7 +74,7 @@ namespace Logging
         if (transmitter == nullptr)
             return;
 
-        auto iter = SimpleDataStructures::ArrayIterator<Binding>(bindings);
+        auto iter = bindings.getIterator();
         while (iter.hasNext())
         {
             auto& binding = iter.next();
@@ -89,16 +87,20 @@ namespace Logging
     template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
     SimpleDataStructures::GrowingArray<ILogMedium*> Logger<E, Headers, MaxLogSize>::getLogMediums(LogType logType) const
     {
-        auto iter = SimpleDataStructures::ArrayIterator<Binding>(bindings);
+        auto iter = bindings.getIterator();
         uint8_t n = 0;
         while (iter.hasNext())
-            if (iter.next().first == (uint32_t)logType) n++;
+            if (iter.next().first & (uint32_t)logType) n++;
 
         auto array = SimpleDataStructures::GrowingArray<ILogMedium*>(n);
 
-        iter = SimpleDataStructures::ArrayIterator<Binding>(bindings);
+        iter.reset(bindings);
         while (iter.hasNext())
-            array.add(iter.next().second);
+        {
+            auto binding = iter.next();
+            if (binding.first & (uint32_t)logType)
+                array.add(binding.second);
+        }
 
         return array;
     }
