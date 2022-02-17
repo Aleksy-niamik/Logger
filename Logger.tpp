@@ -6,6 +6,19 @@
 
 namespace Logging
 {
+    template <class E, const char (&Headers)[enum_elements_count<E>()],uint16_t MaxLogSize>
+    constexpr bool Logger<E, Headers, MaxLogSize>::checkHeadersPrintable(const char * headers, size_t length)
+    {
+        for (size_t i = 0; i < length; ++i)
+        {
+            if (headers[i] < ' ' || headers[i] > '~')
+                return false;
+        }
+
+        return true;
+    }
+
+
     template <class E, const char (&Headers)[enum_elements_count<E>()], uint16_t MaxLogSize>
     template <class T>
     void Logger<E, Headers, MaxLogSize>::log(LogType logType, T item)

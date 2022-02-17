@@ -19,62 +19,43 @@
 namespace Logging
 {
     using namespace EnumReflection;
+    using namespace SimpleDataStructures;
 
     /**
-     * @brief 
+     * @brief Logger basic class used for logging messages through multiple mediums
      * 
-     * @param Headers 
-     * @param length 
-     * @return true 
-     * @return false 
-     */
-    constexpr bool checkHeadersPrintable(const char * Headers, size_t length)
-    {
-        for (size_t i = 0; i < length; ++i)
-        {
-            if (Headers[i] < ' ' || Headers[i] > '~')
-                return false;
-        }
-
-        return true;
-    }
-
-
-    /**
-     * @brief 
-     * 
-     * @tparam E 
-     * @tparam (&Headers)[enum_elements_count<E>()] 
-     * @tparam MaxLogSize 
+     * @tparam E Log type enumeration
+     * @tparam Headers to table of headers - one header for one log type 
+     * @tparam MaxLogSize Max size (in bytes) of a single message
      */
     template <class E,
         const char (&Headers)[enum_elements_count<E>()],
         uint16_t MaxLogSize = 30>
     class Logger
     {
-        static constexpr const int EnumCount = enum_elements_count<E>();
+        static constexpr int EnumCount = enum_elements_count<E>();
 
-        static_assert(std::is_enum<E>(), "type E must be scoped enumeration type");
-        static_assert(is_scoped_enum<E>(), "type E must be scoped enumeration");
+        static constexpr bool checkHeadersPrintable(const char * headers, size_t length);
+
+        static_assert(std::is_enum<E>(), "type E must be a scoped enumeration type");
+        static_assert(is_scoped_enum<E>(), "type E must be a scoped enumeration");
         static_assert(EnumCount <= 32, "enum E can't be bigger than 32 elements (sorry)");
         static_assert(is_enum_normalized<E>(), "enum E must be normalized (begins from 0 and has no gaps)");
-        static_assert(checkHeadersPrintable(Headers, EnumCount), "each header must be printable character"); 
+        static_assert(checkHeadersPrintable(Headers, EnumCount), "each header must be a printable character"); 
 
         
-        /**
-         * asdfsfg
-         * 
+        /** 
+         * @typedef  LogType is log type enumeration type or binary sum of log type enumerations
          */
         typedef FlagEnum<E> LogType;
 
 
         /**
-         * @brief Binding type
-         * 
+         * @typedef Type of binding between logType ang log medium
          */
         typedef Pair<uint32_t, ILogMedium*> Binding;
 
-        SimpleDataStructures::GrowingArray<Binding> bindings;
+        GrowingArray<Binding> bindings;
 
         static constexpr std::size_t BufferSize = MaxLogSize + EnumCount + 1;
         char buffer[BufferSize + 1];
@@ -89,35 +70,84 @@ namespace Logging
         uint8_t precision = 2;
         uint32_t base = 100;
     public:
-        /**
-         * @brief Construct a new Logger object
-         */
         Logger() {};
         Logger(const Logger&) = delete;
         Logger& operator=(const Logger&) = delete;
 
+        /**
+         * @brief Bind transmitter medium with a log type
+         * 
+         * @param logType Log type or binary sum of log types
+         * @param transmitter Pointer to an instance of a class that implements ILogMedium interface
+         */
         void bind(LogType logType, ILogMedium* transmitter);
-        void unbind(LogType logType, ILogMedium* transmitter);
-        SimpleDataStructures::GrowingArray<ILogMedium*> getLogMediums(LogType logType) const;
-
-        void setPrecision(uint8_t precision);
-
-        void setHeaderSeparator(char headerSeparator);
-        void setBufferOverflowCharacter(char bufferOverflowCharacter);
-        void setDecimalSeparator(char decimalSeparator);
 
         /**
-         * @brief Get the Header Separator object
+         * @brief Unbind transmitter medium and a log type
          * 
-         * @return char 
+         * @param logType Log type or binary sum of log types
+         * @param transmitter Pointer to an instance of a class that implements ILogMedium interface
          */
+        void unbind(LogType logType, ILogMedium* transmitter);
+
+        /**
+         * @brief Get the GrowingArray of pointers to ILogMedium instances which are bound to at least one of specified log types
+         * 
+         * @param logType Log type or binary sum of log types
+         */
+        GrowingArray<ILogMedium*> getLogMediums(LogType logType) const;
+
+        /**
+         * @brief Set the precision of logged floating point numbers
+         * 
+         * @param precision Number of decimal places (2 by default)
+         */
+        void setPrecision(uint8_t precision);
+
+        /**
+         * @brief Set the Header Separator - sign between headers section and data
+         * 
+         * @param headerSeparator Sign between headers section and data ('/' by default)
+         */
+        void setHeaderSeparator(char headerSeparator);
+
+        /**
+         * @brief Set the Buffer Overflow Character - sign which is put on the end of logged message when message's length is bigger than MaxLogSize template parameter
+         * 
+         * @param bufferOverflowCharacter Sign which is put on the end of logged message when message's length is bigger than MaxLogSize template parameter ('*' by default)
+         */
+        void setBufferOverflowCharacter(char bufferOverflowCharacter);
+
+        /**
+         * @brief Set the Decimal Separator - sign between integer part of a number and mantissa
+         * 
+         * @param decimalSeparator Sign between integer part of a number and mantissa ('.' by default)
+         */
+        void setDecimalSeparator(char decimalSeparator);
+
         char getHeaderSeparator() const;
         char getBufferOverflowCharacter()const;
         char getDecimalSeparator() const;
 
+        /**
+         * @brief Log some message with specified log type
+         * 
+         * @tparam T Type of the message (eg. int, const char*)
+         * @param logType Log type or binary sum of log types
+         * @param item Message to log (eg. 123, "asdf", 'x')
+         */
         template <class T>
         void log(LogType logType, T item);
 
+        /**
+         * @brief Log multiple messages at once with specified log type
+         * 
+         * @tparam First Type of first message (eg. int, const char*)
+         * @tparam Args Variadic types of next messages
+         * @param logType Log type or binary sum of log types
+         * @param first Message to log (eg. 123, "asdf", 'x')
+         * @param args Other variadic messages
+         */
         template <class First, class... Args>
         void log(LogType logType, First first, Args... args);
 
