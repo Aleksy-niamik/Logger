@@ -38,36 +38,36 @@ namespace Logging
             return x;
         }
     };
-}
 
 
-template <class E>
-constexpr Logging::FlagEnum<E> operator|(E lhs, E rhs)
-{
-    using namespace Logging;
-    return FlagEnum<E>((uint32_t)(FlagEnum<E>(lhs)) | (uint32_t)(FlagEnum<E>(rhs)));
-}
+    template <class E>
+    constexpr Logging::FlagEnum<E> operator|(E lhs, E rhs)
+    {
+        using namespace Logging;
+        return FlagEnum<E>((uint32_t)(FlagEnum<E>(lhs)) | (uint32_t)(FlagEnum<E>(rhs)));
+    }
 
-template <class E>
-constexpr Logging::FlagEnum<E> operator|(E lhs, Logging::FlagEnum<E> rhs)
-{
-    using namespace Logging;
-    return FlagEnum<E>((uint32_t)(FlagEnum<E>(lhs)) | (uint32_t)rhs);
-}
+    template <class E>
+    constexpr Logging::FlagEnum<E> operator|(E lhs, Logging::FlagEnum<E> rhs)
+    {
+        using namespace Logging;
+        return FlagEnum<E>((uint32_t)(FlagEnum<E>(lhs)) | (uint32_t)rhs);
+    }
 
-template <class E>
-constexpr Logging::FlagEnum<E> operator|(Logging::FlagEnum<E> lhs, E rhs)
-{
+    template <class E>
+    constexpr Logging::FlagEnum<E> operator|(Logging::FlagEnum<E> lhs, E rhs)
+    {
 
-    using namespace Logging;
-    return FlagEnum<E>((uint32_t)lhs | (uint32_t)(FlagEnum<E>(rhs)));
-}
+        using namespace Logging;
+        return FlagEnum<E>((uint32_t)lhs | (uint32_t)(FlagEnum<E>(rhs)));
+    }
 
-template <class E>
-constexpr Logging::FlagEnum<E> operator|(Logging::FlagEnum<E> lhs, Logging::FlagEnum<E> rhs)
-{
-    using namespace Logging;
-    return FlagEnum<E>((uint32_t)lhs | (uint32_t)rhs);
+    template <class E>
+    constexpr Logging::FlagEnum<E> operator|(Logging::FlagEnum<E> lhs, Logging::FlagEnum<E> rhs)
+    {
+        using namespace Logging;
+        return FlagEnum<E>((uint32_t)lhs | (uint32_t)rhs);
+    }
 }
 
 
